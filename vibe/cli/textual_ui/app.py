@@ -1077,7 +1077,12 @@ class VibeApp(App):  # noqa: PLR0904
     async def on_approval_app_approval_granted_always_tool(
         self, message: ApprovalApp.ApprovalGrantedAlwaysTool
     ) -> None:
-        self.agent_loop.approve_always(message.tool_name, message.required_permissions)
+        try:
+            self.agent_loop.approve_always(
+                message.tool_name, message.required_permissions
+            )
+        except ConfigFileError as exc:
+            self.notify(str(exc), title="Could not save approval", severity="error")
 
         if self._pending_approval and not self._pending_approval.done():
             self._pending_approval.set_result((ApprovalResponse.YES, None))
@@ -1085,9 +1090,12 @@ class VibeApp(App):  # noqa: PLR0904
     async def on_approval_app_approval_granted_always_permanent(
         self, message: ApprovalApp.ApprovalGrantedAlwaysPermanent
     ) -> None:
-        self.agent_loop.approve_always(
-            message.tool_name, message.required_permissions, save_permanently=True
-        )
+        try:
+            self.agent_loop.approve_always(
+                message.tool_name, message.required_permissions, save_permanently=True
+            )
+        except ConfigFileError as exc:
+            self.notify(str(exc), title="Could not save approval", severity="error")
 
         if self._pending_approval and not self._pending_approval.done():
             self._pending_approval.set_result((ApprovalResponse.YES, None))

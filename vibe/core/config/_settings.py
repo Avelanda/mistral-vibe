@@ -7,7 +7,13 @@ import tomllib
 from typing import Any
 
 from dotenv import dotenv_values
-from pydantic import Field, PrivateAttr, field_validator, model_validator
+from pydantic import (
+    Field,
+    PrivateAttr,
+    ValidationError,
+    field_validator,
+    model_validator,
+)
 from pydantic.fields import FieldInfo
 from pydantic_core import to_jsonable_python
 from pydantic_settings import (
@@ -794,7 +800,12 @@ class VibeConfig(BaseSettings):
             toml_document = {}
         else:
             toml_document = _remove_none_values(jsonable)
-        cls.model_validate(toml_document)
+        try:
+            cls.model_validate(toml_document)
+        except ValidationError as e:
+            raise ConfigFileError(
+                target, f"Invalid configuration in {target}: {e}"
+            ) from e
         with target.open("wb") as f:
             tomli_w.dump(toml_document, f)
 
