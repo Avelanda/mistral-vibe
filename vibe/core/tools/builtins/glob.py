@@ -120,13 +120,23 @@ class Glob(
 
     def _collect_matches(self, pattern: str, base: Path) -> list[Path]:
         excluded = set(self.config.excluded_dirs)
-        found: list[Path] = []
-        for rel in globlib.glob(pattern, root_dir=base, recursive=True):
-            candidate = (base / rel).resolve()
-            if excluded.isdisjoint(candidate.parts):
-                found.append(candidate)
+        expanded_patterns = self._expand_transparent_dir_patterns(pattern)
+        found_by_path: dict[Path, Path] = {}
+        for expanded_pattern in expanded_patterns:
+            for rel in globlib.glob(expanded_pattern, root_dir=base, recursive=True):
+                candidate = (base / rel).resolve()
+                if excluded.isdisjoint(candidate.parts):
+                    found_by_path.setdefault(candidate, candidate)
+        found = list(found_by_path.values())
         found.sort(key=self._mtime, reverse=True)
         return found
+
+    def _expand_transparent_dir_patterns(self, pattern: str) -> list[str]:
+        patterns = [pattern]
+        parts = Path(pattern).parts
+        for index in range(len(parts)):
+            patterns.append(str(Path(*parts[:index]) / "(*)" / Path(*parts[index:])))
+        return list(dict.fromkeys(patterns))
 
     @staticmethod
     def _mtime(path: Path) -> float:

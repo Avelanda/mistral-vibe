@@ -59,6 +59,38 @@ async def test_prunes_excluded_dirs(glob_tool, tmp_path):
 
 
 @pytest.mark.asyncio
+async def test_parenthesized_directories_are_transparent(glob_tool, tmp_path):
+    route_group = tmp_path / "src" / "(subagents)" / "feature"
+    route_group.mkdir(parents=True)
+    target = route_group / "page.tsx"
+    target.write_text("export default function Page() {}\n")
+
+    result = await collect_result(
+        glob_tool.run(GlobArgs(pattern="src/feature/page.tsx"))
+    )
+
+    assert result.match_count == 1
+    assert result.matches[0].endswith("src/(subagents)/feature/page.tsx")
+
+
+@pytest.mark.asyncio
+async def test_parenthesized_directories_are_transparent_for_any_folder(
+    glob_tool, tmp_path
+):
+    route_group = tmp_path / "src" / "(products)" / "feature"
+    route_group.mkdir(parents=True)
+    target = route_group / "page.tsx"
+    target.write_text("export default function Page() {}\n")
+
+    result = await collect_result(
+        glob_tool.run(GlobArgs(pattern="src/feature/page.tsx"))
+    )
+
+    assert result.match_count == 1
+    assert result.matches[0].endswith("src/(products)/feature/page.tsx")
+
+
+@pytest.mark.asyncio
 async def test_truncates_to_max_results(glob_tool, tmp_path):
     for i in range(5):
         (tmp_path / f"f{i}.py").write_text("1\n")
