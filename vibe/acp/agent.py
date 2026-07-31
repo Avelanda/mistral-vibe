@@ -69,7 +69,6 @@ from vibe.acp.commands import AcpCommandController, AcpCommandRegistry
 from vibe.acp.content import project_prompt
 from vibe.acp.exceptions import (
     ConfigurationError,
-    ConversationLimitError,
     InternalError,
     InvalidRequestError,
     NotImplementedMethodError,
@@ -123,7 +122,6 @@ from vibe.app_server.models import (
     ApprovalDecision,
     ApprovalDecisionType,
     PublicCallbackEntry,
-    PublicMessageEntry,
     PublicTurnStatus,
     PublicTurnStopReason,
 )
@@ -570,8 +568,8 @@ class VibeAcpAgent(AcpAgent):
         if turn is not None and turn.status is PublicTurnStatus.INTERRUPTED:
             return PromptResponse(stop_reason="cancelled", usage=self._usage(session))
         if turn is not None and turn.stop_reason is PublicTurnStopReason.LIMIT:
-            raise ConversationLimitError(
-                self._last_assistant_text(session) or "Conversation limit reached"
+            return PromptResponse(
+                stop_reason="max_turn_requests", usage=self._usage(session)
             )
         show_feedback = await session.app_server.resources.feedback.should_show(
             pending_user_messages=1
@@ -1215,19 +1213,6 @@ class VibeAcpAgent(AcpAgent):
                 session
                 for session in self.sessions.values()
                 if session.app_server.session_id == session_id
-            ),
-            None,
-        )
-
-    @staticmethod
-    def _last_assistant_text(session: AcpSession) -> str | None:
-        return next(
-            (
-                entry.text
-                for entry in reversed(session.app_server.history)
-                if isinstance(entry, PublicMessageEntry)
-                and entry.role == "assistant"
-                and entry.text
             ),
             None,
         )

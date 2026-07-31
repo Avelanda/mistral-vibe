@@ -304,6 +304,23 @@ async def test_response_too_long_returns_max_tokens_stop_reason(
 
 
 @pytest.mark.asyncio
+async def test_conversation_limit_returns_max_turn_requests_stop_reason() -> None:
+    agent, _ = _agent(FakeBackend())
+    try:
+        created = await agent.new_session(cwd=str(Path.cwd()), mcp_servers=[])
+        await agent.set_config_option("max_turns", created.session_id, "0")
+
+        response = await agent.prompt(
+            session_id=created.session_id,
+            prompt=[TextContentBlock(type="text", text="Do the task")],
+        )
+
+        assert response.stop_reason == "max_turn_requests"
+    finally:
+        await agent.close()
+
+
+@pytest.mark.asyncio
 async def test_acp_host_filesystem_flows_through_the_app_server(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
