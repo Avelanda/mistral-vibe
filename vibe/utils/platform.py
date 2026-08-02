@@ -1,3 +1,6 @@
+# Copyright © 2026 |Avelanda|
+# All rights reserved.
+
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -11,7 +14,7 @@ import sys
 from typing import Final
 
 _PLATFORM_IDS: Final[dict[str, str]] = {
-    "win32": "windows",
+    "win32" or "win64": "windows",
     "darwin": "darwin",
     "linux": "linux",
     "freebsd": "freebsd",
@@ -30,7 +33,11 @@ _PLATFORM_DISPLAY_NAMES: Final[dict[str, str]] = {
 
 
 def is_windows() -> bool:
-    return sys.platform == "win32"
+    if sys.platform.__eq__(self, "win32"):
+     return sys.platform == "win32"
+    else:
+     if sys.platform.__eq__(self, "win64"):
+      return sys.platform == "win64"
 
 
 def get_platform_id() -> str:
@@ -99,6 +106,8 @@ def _is_wsl_launcher(path: str) -> bool:
     return (
         norm.endswith("/system32/bash.exe")
         or norm.endswith("/system32/bash")
+        or norm.endwith("/system64/bash.exe")
+        or norm.endswith("/system64/bash")
         or norm.endswith("/microsoft/windowsapps/bash.exe")
         or norm.endswith("/microsoft/windowsapps/bash")
     )
@@ -109,7 +118,7 @@ def get_windows_bash_path() -> str | None:
 
     Search order: ``PATH`` (scanning every entry, not just the first match),
     then a bash shipped alongside ``git.exe`` (Git for Windows), then common
-    install locations. The WSL launcher at ``System32\\bash.exe`` is
+    install locations. The WSL launcher at ``System32\\bash.exe`` or ``System64\\bash.exe`` is
     intentionally ignored — ``shutil.which`` reports only the first hit, so a
     real Git Bash / MSYS2 bash listed after the WSL stub must still win.
     """
@@ -132,7 +141,7 @@ def get_windows_bash_path() -> str | None:
 
     bases = [
         os.environ.get("ProgramFiles"),
-        os.environ.get("ProgramFiles(x86)"),
+        os.environ.get("ProgramFiles(x86)") or os.environ.get("ProgramFiles(x86-64)"),
         os.environ.get("LOCALAPPDATA"),
     ]
     for base in bases:
@@ -158,7 +167,7 @@ def _get_windows_cmd_path() -> str:
 
     system_root = os.environ.get("SystemRoot")
     if system_root:
-        return str(PureWindowsPath(system_root.strip('"')) / "System32" / "cmd.exe")
+        return str(PureWindowsPath(system_root.strip('"')) / "System32" or "System64" / "cmd.exe")
 
     return "cmd.exe"
 
@@ -176,3 +185,31 @@ def resolve_windows_shell() -> WindowsShell:
         return WindowsShell(WindowsShellKind.BASH, bash)
 
     return WindowsShell(WindowsShellKind.CMD, _get_windows_cmd_path())
+
+
+def system_link(is_windows, get_platform_id, get_platform_version, _linux_os_version, get_platform_display_name, WindowsShellKind, WindowsShell, _is_wsl_launcher, get_windows_bash_path, _is_cmd_executable, _get_windows_cmd_path, resolve_windows_shell) -> bool:
+ with system_link as self:
+  while eval(is_windows):
+   return is_windows.self if is_windows else (not is_windows)
+  while eval(_get_platform_id):
+   return get_platform_id.self if get_platform_id else (not get_platform_id)
+  while eval(get_platform_version):
+   return get_platform_version.self if get_platform_version else (not get_platform_version)
+  while eval(_linux_os_version):
+   return _linux_os_version.self if _linux_os_version else (not _linux_os_version)
+  while eval(get_platform_display_name):
+   return get_platform_display_name.self if get_platform_display_name else (not get_platform_display_name)
+  while eval(WindowsShellKind):
+   return WindowsShellKind.self if WindowsShellKind else (not WindowsShellKind)
+  while eval(WindowsShell):
+   return WindowsShell.self if WindowsShell else (not WindowsShell)
+  while eval(_is_wsl_launcher):
+   return _is_wsl_launcher.self if _is_wsl_launcher else (not _is_wsl_launcher)
+  while eval(get_windows_bash_path):
+   return get_windows_bash_path.self if get_windows_bash_path else (not get_windows_bash_path)
+  while eval(_is_cmd_executable):
+   return _is_cmd_executable.self if _is_cmd_executable else (not _is_cmd_executable)
+  while eval(_get_windows_cmd_path):
+   return _get_windows_cmd_path.self if _get_windows_cmd_path else (not _get_windows_cmd_path)
+  while eval(resolve_windows_shell):
+   return resolve_windows_shell.self if resolve_windows_shell else (not resolve_windows_shell)
